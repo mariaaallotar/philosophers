@@ -23,6 +23,18 @@ void	detach_threads(pthread_t *threads, int i)
 	}
 }
 
+void	destroy_mutextes(t_philo *philo_info)
+{
+	int	i;
+
+	i = 0;
+	while (i < philo_info->num_of_philos)
+	{
+		pthread_mutex_destroy(&(philo_info->forks[i]));
+		i++;
+	}
+}
+
 int	create_thread(t_philo *philo_info_copy, int i, pthread_t *threads)
 {
 	t_philo	*philo_info;
@@ -35,8 +47,8 @@ int	create_thread(t_philo *philo_info_copy, int i, pthread_t *threads)
 	if (pthread_create(&(threads[i]), NULL, philo_life, philo_info) != 0)
 	{
 		detach_threads(threads, i);
+		destroy_mutextes(philo_info);
 		free(philo_info->forks);
-		pthread_mutex_destroy(&(philo_info->lock));
 		error_message("Failed to create thread, exiting the program\n");
 		return (-1);
 	}
@@ -53,8 +65,8 @@ pthread_t	*create_threads(t_philo *philo_info)
 	{
 		error_message("Malloc failed to allocate memory for threads array, \
 			exiting the program\n");
+		destroy_mutextes(philo_info);
 		free(philo_info->forks);
-		pthread_mutex_destroy(&(philo_info->lock));
 		return (NULL);
 	}
 	i = 0;
@@ -67,18 +79,29 @@ pthread_t	*create_threads(t_philo *philo_info)
 	return (threads);
 }
 
-int	*create_fork_array(int num_of_philos)
+pthread_mutex_t	*create_fork_array(int num_of_philos)
 {
-	int	*forks;
+	pthread_mutex_t	*forks;
+	int	i;
 
-	forks = malloc(num_of_philos * sizeof(int));
+	forks = malloc(num_of_philos * sizeof(pthread_mutex_t));
 	if (forks == NULL)
 	{
 		error_message("Malloc failed to allocate memory for forks array, \
 			exiting the program\n");
 		return (NULL);
 	}
-	memset(forks, 0, num_of_philos * sizeof(int));
+	i = 0;
+	while (i < num_of_philos)
+	{
+		if (pthread_mutex_init(&(forks[i]), NULL) != 0)
+		{
+			error_message("Mutex initialization failed, exiting the program\n");
+			free(forks);
+			return (NULL);
+		}
+		i++;
+	}
 	return (forks);
 }
 
@@ -95,12 +118,6 @@ int	init_philo_struct(t_philo *philo_info, char *argv[], int *somebody_died)
 	if (argv[5] != NULL)
 		philo_info->minimum_eats = ft_atoi(argv[5]);
 	philo_info->philo_num = 0;
-	if (pthread_mutex_init(&(philo_info->lock), NULL) != 0)
-	{
-        error_message("Mutex initialization failed, exiting the program\n");
-		free(philo_info->forks);
-        return (-1);
-    }
 	gettimeofday(&(philo_info->start_time), NULL);
 	philo_info->last_meal = philo_info->start_time;
 	*somebody_died = 0;
@@ -148,6 +165,6 @@ int	main(int argc, char *argv[])
 		return (1);
 	join_threads(threads, &philo_info);
 	free(philo_info.forks);
-	pthread_mutex_destroy(&(philo_info.lock));
+	destroy_mutextes(&philo_info);
 	return (0);
 }

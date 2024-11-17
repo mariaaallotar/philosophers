@@ -14,9 +14,8 @@ typedef struct s_philo
 {
 	int	philo_num;
 	struct timeval	last_meal;
-	int	*forks;
+	pthread_mutex_t	*forks;
 	struct timeval	start_time;
-	pthread_mutex_t lock;
 	int	*somebody_died;
 	int	num_of_philos;
 	int	time_to_die;
