@@ -9,6 +9,7 @@ void	join_threads(pthread_t *threads, t_philo *philo_info)
 	while (i < philo_info->num_of_philos)
 	{
 		pthread_join(threads[i], NULL);
+		//printf("Thread %i is joined\n", i + 1);
 		i++;
 	}
 }
@@ -141,8 +142,8 @@ int	validate_args(int argc, char *argv[])
 	{
 		if (ft_atoi(*argv) <= 0)
 		{
-			printf("Argument %i outside of accepted range\nExiting program\n",
-				ft_atoi(*argv));
+			printf("Argument '%s' outside of accepted range\nExiting program\n",
+				*argv);
 			return (-1);
 		}
 		argv++;
@@ -163,7 +164,15 @@ int	main(int argc, char *argv[])
 	threads = create_threads(&philo_info);
 	if (threads == NULL)
 		return (1);
-	join_threads(threads, &philo_info);
+	while (1)
+	{
+		if (*(philo_info.somebody_died))
+		{
+			join_threads(threads, &philo_info);
+			break ;
+		}
+		usleep(5);
+	}
 	free(philo_info.forks);
 	destroy_mutextes(&philo_info);
 	return (0);

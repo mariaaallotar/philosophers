@@ -43,6 +43,8 @@ int	ft_atoi(const char *str)
 			return (-1);
 		str++;
 	}
+	if (*str != '\0')
+		return (-1);
 	return ((int)(res * sign));
 }
 
