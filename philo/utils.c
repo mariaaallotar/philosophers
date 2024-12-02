@@ -48,16 +48,24 @@ int	ft_atoi(const char *str)
 	return ((int)(res * sign));
 }
 
-long	get_time_elapsed(t_philo *philo_info)
+unsigned long	milliseconds_since_start(t_philo *philo_info)
 {
 	struct timeval now;
-	long	seconds;
-	long	microseconds;
-	long	milliseconds;
+	unsigned long	seconds;
+	unsigned long	microseconds;
+	unsigned long	milliseconds;
 
 	gettimeofday(&now, NULL);
     seconds = now.tv_sec - philo_info->start_time.tv_sec;
-    microseconds = now.tv_usec - philo_info->start_time.tv_usec;
+    if (now.tv_usec < philo_info->start_time.tv_usec)
+    {
+		seconds--;
+        microseconds = (now.tv_usec + 1000000) - philo_info->start_time.tv_usec;
+    }
+    else
+    {
+        microseconds = now.tv_usec - philo_info->start_time.tv_usec;
+    }
     milliseconds = (seconds * 1000) + (microseconds / 1000);
 	return (milliseconds);
 }
