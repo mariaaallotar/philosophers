@@ -21,6 +21,7 @@ typedef struct	s_info
 	int	time_to_eat;
 	int	time_to_sleep;
 	int	minimum_eats;
+	int	detach;
 }	t_info;
 
 typedef struct s_philo
@@ -33,6 +34,17 @@ typedef struct s_philo
 
 void	error_message(char *message);
 int	ft_atoi(const char *str);
-unsigned long	milliseconds_since_start(t_philo *philo_info);
+unsigned long	milliseconds_since_start(t_info *info);
+void	detach_threads(t_philo *philos, int i);
+void	destroy_mutextes(t_info *info);
+pthread_mutex_t	*create_fork_array(int num_of_philos);
+void    *philo_life(void *args);
+int	philo_eat(t_philo *philo);
+int	create_thread(t_info *info, int i, t_philo *philos);
+int	died_of_hunger(t_philo *philo);
+int	time_to_stop(t_philo *philo);
+int	dynamic_sleep(t_philo *philo, int time_to_do);
+void	philo_print(t_info *info, int philo_num, char *message);
+int	philo_sleep(t_philo *philo);
 
 #endif

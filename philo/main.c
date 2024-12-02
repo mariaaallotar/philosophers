@@ -1,27 +1,16 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   main.c                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: maheleni <maheleni@student.hive.fi>        +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/12/02 10:26:47 by maheleni          #+#    #+#             */
+/*   Updated: 2024/12/02 16:14:53 by maheleni         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 #include "philo.h"
-
-int	create_thread(t_info *info, int i, t_philo *philos)
-{
-	t_philo		philo;
-	pthread_t	thread;
-
-	philo.shared_info = info;
-	gettimeofday(&(philo.last_meal), NULL);
-	philo.philo_num = i + 1;
-	philo.thread = thread;
-	philos[i] = philo;
-	if (pthread_create(&(thread), NULL, philo_life, &philo) != 0)
-	{
-		detach_threads(philos, i);
-		destroy_mutextes(info);
-		free(info->forks);
-		free(philos);
-		error_message("Failed to create thread, exiting the program\n");
-		return (-1);
-	}
-	return (1);
-}
 
 t_philo	*create_philos(t_info *info)
 {
@@ -47,32 +36,6 @@ t_philo	*create_philos(t_info *info)
 	return (philos);
 }
 
-pthread_mutex_t	*create_fork_array(int num_of_philos)
-{
-	pthread_mutex_t	*forks;
-	int	i;
-
-	forks = malloc(num_of_philos * sizeof(pthread_mutex_t));
-	if (forks == NULL)
-	{
-		error_message("Malloc failed to allocate memory for forks array, \
-			exiting the program\n");
-		return (NULL);
-	}
-	i = 0;
-	while (i < num_of_philos)
-	{
-		if (pthread_mutex_init(&(forks[i]), NULL) != 0)
-		{
-			error_message("Mutex initialization failed, exiting the program\n");
-			free(forks);
-			return (NULL);
-		}
-		i++;
-	}
-	return (forks);
-}
-
 int	init_info_struct(t_info *info, char *argv[])
 {
 	info->num_of_philos = ft_atoi(argv[1]);
@@ -93,6 +56,7 @@ int	init_info_struct(t_info *info, char *argv[])
 		info->minimum_eats = ft_atoi(argv[5]);
 	gettimeofday(&(info->start_time), NULL);
 	info->somebody_died = 0;
+	info->detach = 0;
 	return (1);
 }
 
@@ -121,6 +85,33 @@ int	validate_args(int argc, char *argv[])
 	return (1);
 }
 
+void	monitor_philos(t_info *info, t_philo *philos)
+{
+	// int	i;
+
+	while (1)
+	{
+		// i = 0;
+		// while (i < info->num_of_philos)
+		// {
+		// 	// printf("Looking if %i died of hunger\n", philos[i].philo_num);
+		// 	if (died_of_hunger(&(philos[i])))
+		// 		break ;
+		// 	i++;
+		// }
+		// printf("STATUS: %i %p\n", info->somebody_died, &(info->somebody_died));
+		if (info->somebody_died)
+		{
+			detach_threads(philos, info->num_of_philos);
+			printf("%lu %i died\n", milliseconds_since_start(info), info->somebody_died);
+			break ;
+		}
+		if (info->detach)
+			break ;
+		usleep(5000);
+	}
+}
+
 int	main(int argc, char *argv[])
 {
 	t_info	info;
@@ -133,4 +124,9 @@ int	main(int argc, char *argv[])
 	philos = create_philos(&info);
 	if (philos == NULL)
 		return (1);
+	monitor_philos(&info, philos);
+	destroy_mutextes(&info);
+	free(info.forks);
+	free(philos);
+	return (0);
 }
