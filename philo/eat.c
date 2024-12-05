@@ -6,7 +6,7 @@
 /*   By: maheleni <maheleni@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/02 15:34:41 by maheleni          #+#    #+#             */
-/*   Updated: 2024/12/02 16:05:10 by maheleni         ###   ########.fr       */
+/*   Updated: 2024/12/05 16:06:55 by maheleni         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,20 +38,20 @@ int	philo_take_forks(t_philo *philo)
 	else
 		right_fork = philo->philo_num;
 	pthread_mutex_lock(&(philo->shared_info->forks[left_fork]));
-	philo_print(philo->shared_info, philo->philo_num, "has taken a fork");
 	if (time_to_stop(philo))
 	{
 		pthread_mutex_unlock(&(philo->shared_info->forks[left_fork]));
 		return (-1);
 	}
-	pthread_mutex_lock(&(philo->shared_info->forks[right_fork]));
 	philo_print(philo->shared_info, philo->philo_num, "has taken a fork");
+	pthread_mutex_lock(&(philo->shared_info->forks[right_fork]));
 	if (time_to_stop(philo))
 	{
 		pthread_mutex_unlock(&(philo->shared_info->forks[left_fork]));
 		pthread_mutex_unlock(&(philo->shared_info->forks[right_fork]));
 		return (-1);
 	}
+	philo_print(philo->shared_info, philo->philo_num, "has taken a fork");
 	return (1);
 }
 

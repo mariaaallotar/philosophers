@@ -6,7 +6,7 @@
 /*   By: maheleni <maheleni@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/02 15:09:53 by maheleni          #+#    #+#             */
-/*   Updated: 2024/12/02 16:12:57 by maheleni         ###   ########.fr       */
+/*   Updated: 2024/12/05 16:13:23 by maheleni         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,12 @@ int	died_of_hunger(t_philo *philo)
 	{
 		// printf("-------------------------------------------------\n");
 		// printf("%i set in somebody died\n", philo.philo_num);
+		pthread_mutex_lock(&(philo->shared_info->data_lock));
 		philo->shared_info->somebody_died = philo->philo_num;
+		pthread_mutex_unlock(&(philo->shared_info->data_lock));
+		pthread_mutex_lock(&(philo->shared_info->lock));
+		printf("%lu %i died\n", milliseconds_since_start(philo->shared_info), philo->shared_info->somebody_died);
+		pthread_mutex_unlock(&(philo->shared_info->lock));
 		return (1);
 	}
 	return (0);
@@ -49,12 +54,22 @@ int	died_of_hunger(t_philo *philo)
 
 void	philo_print(t_info *info, int philo_num, char *message)
 {
+	pthread_mutex_lock(&(info->lock));
 	printf("%lu %i %s\n", milliseconds_since_start(info), philo_num, message);
+	pthread_mutex_unlock(&(info->lock));
 }
 
 int	time_to_stop(t_philo *philo)
 {
+	pthread_mutex_lock(&(philo->shared_info->lock));
 	if (philo->shared_info->somebody_died)
+	{
+		pthread_mutex_unlock(&(philo->shared_info->lock));
+		return (1);
+	}
+	pthread_mutex_unlock(&(philo->shared_info->lock));
+	if (philo->shared_info->minimum_eats > 0 &&
+		philo->shared_info->philos_finished >= philo->shared_info->num_of_philos)
 		return (1);
 	if (died_of_hunger(philo))
 		return (1);
