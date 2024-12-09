@@ -6,7 +6,7 @@
 /*   By: maheleni <maheleni@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/02 10:26:47 by maheleni          #+#    #+#             */
-/*   Updated: 2024/12/05 16:19:00 by maheleni         ###   ########.fr       */
+/*   Updated: 2024/12/09 17:03:52 by maheleni         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,15 +42,23 @@ int	init_info_struct(t_info *info, char *argv[])
 	info->forks = create_fork_array(info->num_of_philos);
 	if (info->forks == NULL)
 		return (-1);
-	if (pthread_mutex_init(&(info->lock), NULL) != 0)
+	if (pthread_mutex_init(&(info->data_lock), NULL) != 0)
 	{
 		free(info->forks);
+		error_message("Mutex initialization failed, exiting the program\n");
+		return (-1);
+	}
+	if (pthread_mutex_init(&(info->print_lock), NULL) != 0)
+	{
+		free(info->forks);
+		pthread_mutex_destroy(&(info->data_lock));
 		error_message("Mutex initialization failed, exiting the program\n");
 		return (-1);
 	}
 	info->time_to_die = ft_atoi(argv[2]);
 	info->time_to_eat = ft_atoi(argv[3]);
 	info->time_to_sleep = ft_atoi(argv[4]);
+	info->time_to_think = info->time_to_die - info->time_to_eat - info->time_to_sleep - 1;
 	info->minimum_eats = -1;
 	if (argv[5] != NULL)
 		info->minimum_eats = ft_atoi(argv[5]);
@@ -85,37 +93,42 @@ int	validate_args(int argc, char *argv[])
 	return (1);
 }
 
-// void	monitor_philos(t_info *info, t_philo *philos)
-// {
-// 	//is this function at all needed
+int	monitor_philos(t_info *info, t_philo **philos)
+{
+	//is this function at all needed
 
-// 	// int	i;
+	int	i;
 
-// 	while (1)
-// 	{
-// 		// i = 0;
-// 		// while (i < info->num_of_philos)
-// 		// {
-// 		// 	// printf("Looking if %i died of hunger\n", philos[i].philo_num);
-// 		// 	if (died_of_hunger(&(philos[i])))
-// 		// 		break ;
-// 		// 	i++;
-// 		// }
-// 		// printf("STATUS: %i %p\n", info->somebody_died, &(info->somebody_died));
-// 		if (info->somebody_died)
-// 		{
-// 			detach_threads(philos, info->num_of_philos);
-// 			printf("%lu %i died\n", milliseconds_since_start(info), info->somebody_died);
-// 			break ;
-// 		}
-// 		if (info->detach)
-// 		{
-// 			join_threads(philos, info);
-// 			break ;
-// 		}
-// 		usleep(5000);
-// 	}
-// }
+	while (1)
+	{
+		i = 0;
+		while (i < info->num_of_philos)
+		{
+			//printf("Looking if %i died of hunger\n", philos[i]->philo_num);
+			if (died_of_hunger(philos[i]))
+				break ;
+			i++;
+		}
+		pthread_mutex_lock(&(info->data_lock));
+		if (info->somebody_died)
+		{
+			detach_threads(philos, info->num_of_philos);
+			pthread_mutex_unlock(&(info->data_lock));
+			return (0);
+		}
+		if (info->minimum_eats > 0 &&
+			info->philos_finished >= info->num_of_philos)
+		{
+			detach_threads(philos, info->num_of_philos);
+			pthread_mutex_unlock(&(info->data_lock));
+			return (0);
+		}
+		pthread_mutex_unlock(&(info->data_lock));
+		usleep(5000);
+	}
+	join_threads(philos, info);
+	return (0);
+}
 
 int	main(int argc, char *argv[])
 {
@@ -129,9 +142,9 @@ int	main(int argc, char *argv[])
 	philos = create_philos(&info);
 	if (philos == NULL)
 		return (1);
-	join_threads(philos, &info);
-	// if (info.somebody_died > 0)
-	// 	printf("%lu %i died\n", milliseconds_since_start(&info), info.somebody_died);
+	monitor_philos(&info, philos);
+	if (info.somebody_died > 0)
+		printf("%lu %i died\n", event_at_milliseconds(info.death_time, info), info.somebody_died);
 	destroy_mutextes(&info);
 	free(info.forks);
 	free(philos);

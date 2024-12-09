@@ -3,7 +3,7 @@ NAME = philo
 CC = cc -g
 FLAGS = -Wall -Wextra -Werror
 
-CFILES := main.c utils.c philo_life.c philo_life_utils.c mutex_handling.c threads_handling.c eat.c sleep.c
+CFILES := main.c utils.c philo_life.c philo_life_utils.c mutex_handling.c threads_handling.c eat.c sleep_and_think.c
 OBJ_PATH := objects/
 OBJS := $(CFILES:%.c=$(OBJ_PATH)%.o)
 

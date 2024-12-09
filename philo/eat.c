@@ -6,7 +6,7 @@
 /*   By: maheleni <maheleni@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/02 15:34:41 by maheleni          #+#    #+#             */
-/*   Updated: 2024/12/05 16:06:55 by maheleni         ###   ########.fr       */
+/*   Updated: 2024/12/09 16:27:42 by maheleni         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,6 @@ void	philo_release_forks(t_philo *philo)
 	else
 		right_fork = philo->philo_num;
 	pthread_mutex_unlock(&(philo->shared_info->forks[right_fork]));
-	//printf("%lu %i has released forks\n", get_current_time_milliseconds(philo_info), philo_info->philo_num);
 }
 
 int	philo_take_forks(t_philo *philo)
