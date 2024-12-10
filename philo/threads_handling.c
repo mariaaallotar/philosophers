@@ -6,7 +6,7 @@
 /*   By: maheleni <maheleni@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/02 10:26:32 by maheleni          #+#    #+#             */
-/*   Updated: 2024/12/09 17:04:21 by maheleni         ###   ########.fr       */
+/*   Updated: 2024/12/10 16:04:51 by maheleni         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,13 +44,22 @@ void	detach_threads(t_philo **philo_pointers, int i)
 
 int	create_thread(t_info *info, int i, t_philo **philos)
 {
-	t_philo		*philo;
+	t_philo	*philo;
+	int		left_fork;
+	int		right_fork;
 
     philo = malloc(sizeof(t_philo));
 	philo->shared_info = info;
 	gettimeofday(&(philo->last_meal), NULL);
 	philo->philo_num = i + 1;
 	philos[i] = philo;
+	left_fork = philo->philo_num - 1;
+	if (philo->philo_num == philo->shared_info->num_of_philos)
+		right_fork = 0;
+	else
+		right_fork = philo->philo_num;
+	philo->left_fork = &(info->forks[left_fork]);
+	philo->right_fork = &(info->forks[right_fork]);
 	if (pthread_create(&(philo->thread), NULL, philo_life, philo) != 0)
 	{
 		info->somebody_died = -1;		//remember this

@@ -6,7 +6,7 @@
 /*   By: maheleni <maheleni@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/02 10:26:47 by maheleni          #+#    #+#             */
-/*   Updated: 2024/12/09 17:03:52 by maheleni         ###   ########.fr       */
+/*   Updated: 2024/12/10 16:22:58 by maheleni         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,8 @@ t_philo	**create_philos(t_info *info)
 			return (NULL);
 		i++;
 	}
+	gettimeofday(&(info->start_time), NULL);
+	info->start = 1;
 	return (philos);
 }
 
@@ -58,13 +60,13 @@ int	init_info_struct(t_info *info, char *argv[])
 	info->time_to_die = ft_atoi(argv[2]);
 	info->time_to_eat = ft_atoi(argv[3]);
 	info->time_to_sleep = ft_atoi(argv[4]);
-	info->time_to_think = info->time_to_die - info->time_to_eat - info->time_to_sleep - 1;
 	info->minimum_eats = -1;
 	if (argv[5] != NULL)
 		info->minimum_eats = ft_atoi(argv[5]);
 	info->philos_finished = 0;
 	gettimeofday(&(info->start_time), NULL);
 	info->somebody_died = 0;
+	info->start = 0;
 	return (1);
 }
 
@@ -95,8 +97,6 @@ int	validate_args(int argc, char *argv[])
 
 int	monitor_philos(t_info *info, t_philo **philos)
 {
-	//is this function at all needed
-
 	int	i;
 
 	while (1)
@@ -144,7 +144,7 @@ int	main(int argc, char *argv[])
 		return (1);
 	monitor_philos(&info, philos);
 	if (info.somebody_died > 0)
-		printf("%lu %i died\n", event_at_milliseconds(info.death_time, info), info.somebody_died);
+		printf("%lu %i died\n", milliseconds_since_start(&info), info.somebody_died);
 	destroy_mutextes(&info);
 	free(info.forks);
 	free(philos);

@@ -6,7 +6,7 @@
 /*   By: maheleni <maheleni@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/02 11:51:22 by maheleni          #+#    #+#             */
-/*   Updated: 2024/12/09 13:33:26 by maheleni         ###   ########.fr       */
+/*   Updated: 2024/12/10 16:23:27 by maheleni         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,24 +26,35 @@ void	one_philo_edge(t_philo	*philo)
 	pthread_mutex_unlock(&(philo->shared_info->forks[left_fork]));
 }
 
+void	syncronize_philos(t_info *info)
+{
+	while (info->start == 0)
+	{
+		usleep(1);
+	}
+}
+
 void    *philo_life(void *args)
 {
 	t_philo	*philo;
 	int		i;
 
 	philo = (t_philo *) args;
+	if (philo->shared_info->num_of_philos > 100)
+		syncronize_philos(philo->shared_info);
 	if (philo->shared_info->num_of_philos == 1)
 	{
 		one_philo_edge(philo);
 		return (NULL);
 	}
+	gettimeofday(&(philo->last_meal), NULL);
 	i = 0;
 	while (1)
 	{
 		if (philo_think(philo) == -1)
 			break ;
 		if (i == 0 && philo->philo_num % 2 == 1)
-			usleep (philo->shared_info->time_to_eat / 2);
+			dynamic_sleep(philo, philo->shared_info->time_to_eat - 5);
 		if (time_to_stop(philo))
 			break ;
 		if (philo_eat(philo) == -1)

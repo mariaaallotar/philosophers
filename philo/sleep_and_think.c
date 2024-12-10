@@ -6,7 +6,7 @@
 /*   By: maheleni <maheleni@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/02 16:08:05 by maheleni          #+#    #+#             */
-/*   Updated: 2024/12/09 16:34:23 by maheleni         ###   ########.fr       */
+/*   Updated: 2024/12/10 10:24:08 by maheleni         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ int	philo_think(t_philo *philo)
 	{
 		return (0);
 	}
-	return (dynamic_sleep(philo, philo->shared_info->time_to_think));
+	return (0);
 }
 
 int	philo_sleep(t_philo *philo)

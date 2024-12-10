@@ -6,7 +6,7 @@
 /*   By: maheleni <maheleni@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/06 17:31:08 by maheleni          #+#    #+#             */
-/*   Updated: 2024/12/09 16:50:38 by maheleni         ###   ########.fr       */
+/*   Updated: 2024/12/10 15:01:12 by maheleni         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,9 +34,9 @@ typedef struct	s_info
 	int	time_to_die;
 	int	time_to_eat;
 	int	time_to_sleep;
-	int	time_to_think;
 	int	minimum_eats;
 	int	philos_finished;
+	int	start;
 }	t_info;
 
 typedef struct s_philo
@@ -45,6 +45,8 @@ typedef struct s_philo
 	struct timeval	last_meal;
 	pthread_t	thread;
 	t_info	*shared_info;
+	pthread_mutex_t	*left_fork;
+	pthread_mutex_t	*right_fork;
 }	t_philo;
 
 void	error_message(char *message);

@@ -6,7 +6,7 @@
 /*   By: maheleni <maheleni@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/02 15:09:53 by maheleni          #+#    #+#             */
-/*   Updated: 2024/12/09 14:39:15 by maheleni         ###   ########.fr       */
+/*   Updated: 2024/12/10 16:17:17 by maheleni         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,7 +56,7 @@ unsigned long   time_since_last_meal(t_philo philo)
 
 int	died_of_hunger(t_philo *philo)
 {
-	if (time_since_last_meal(*philo) >= (unsigned long) philo->shared_info->time_to_die)
+	if (time_since_last_meal(*philo) > (unsigned long) philo->shared_info->time_to_die)
 	{
 		pthread_mutex_lock(&(philo->shared_info->data_lock));
 		gettimeofday(&(philo->shared_info->death_time), NULL);
@@ -89,8 +89,6 @@ int	time_to_stop(t_philo *philo)
 		return (1);
 	}
 	pthread_mutex_unlock(&(philo->shared_info->data_lock));
-	if (died_of_hunger(philo))
-		return (1);
 	return (0);
 }
 
