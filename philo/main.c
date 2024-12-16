@@ -5,12 +5,39 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: maheleni <maheleni@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/12/02 10:26:47 by maheleni          #+#    #+#             */
-/*   Updated: 2024/12/10 16:22:58 by maheleni         ###   ########.fr       */
+/*   Created: 2024/12/13 10:46:02 by maheleni          #+#    #+#             */
+/*   Updated: 2024/12/16 15:34:32 by maheleni         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
+
+void	free_and_destroy(t_info *info, pthread_mutex_t *forks, pthread_mutex_t
+	*lock, t_philo **philos)
+{
+	int	i;
+
+	if (forks != NULL)
+		destroy_forks(forks, info->num_of_philos - 1);
+	free(forks);
+	if (lock != NULL)
+		pthread_mutex_destroy(lock);
+	if (philos != NULL)
+	{
+		i = 0;
+		while (i < info->num_of_philos)
+		{
+			if (philos[i] != NULL)
+			{
+				printf("HERE\n");
+				free(philos[i]);
+				break ;
+			}
+			i++;
+		}
+		free(philos);
+	}
+}
 
 t_philo	**create_philos(t_info *info)
 {
@@ -20,21 +47,26 @@ t_philo	**create_philos(t_info *info)
 	philos = malloc(info->num_of_philos * sizeof(t_philo *));
 	if (philos == NULL)
 	{
+		free_and_destroy(info, info->forks, &(info->lock), NULL);
 		error_message("Malloc failed to allocate memory for philo array, \
 			exiting the program\n");
-		destroy_mutextes(info);
-		free(info->forks);
 		return (NULL);
+	}
+	memset(philos, 0, sizeof(*philos));
+	i = 0;
+	info->start_time = get_time();
+	while (i < info->num_of_philos)
+	{
+		printf("0 %i is thinking\n", i + 1);
+		i++;
 	}
 	i = 0;
 	while (i < info->num_of_philos)
 	{
-		if (create_thread(info, i, philos) == -1)
+		if (start_philo(info, i, philos) == -1)
 			return (NULL);
 		i++;
 	}
-	gettimeofday(&(info->start_time), NULL);
-	info->start = 1;
 	return (philos);
 }
 
@@ -44,19 +76,8 @@ int	init_info_struct(t_info *info, char *argv[])
 	info->forks = create_fork_array(info->num_of_philos);
 	if (info->forks == NULL)
 		return (-1);
-	if (pthread_mutex_init(&(info->data_lock), NULL) != 0)
-	{
-		free(info->forks);
-		error_message("Mutex initialization failed, exiting the program\n");
+	if (create_data_and_print_mutexes(info) == -1)
 		return (-1);
-	}
-	if (pthread_mutex_init(&(info->print_lock), NULL) != 0)
-	{
-		free(info->forks);
-		pthread_mutex_destroy(&(info->data_lock));
-		error_message("Mutex initialization failed, exiting the program\n");
-		return (-1);
-	}
 	info->time_to_die = ft_atoi(argv[2]);
 	info->time_to_eat = ft_atoi(argv[3]);
 	info->time_to_sleep = ft_atoi(argv[4]);
@@ -64,9 +85,8 @@ int	init_info_struct(t_info *info, char *argv[])
 	if (argv[5] != NULL)
 		info->minimum_eats = ft_atoi(argv[5]);
 	info->philos_finished = 0;
-	gettimeofday(&(info->start_time), NULL);
 	info->somebody_died = 0;
-	info->start = 0;
+	//info->start = 0;
 	return (1);
 }
 
@@ -95,42 +115,7 @@ int	validate_args(int argc, char *argv[])
 	return (1);
 }
 
-int	monitor_philos(t_info *info, t_philo **philos)
-{
-	int	i;
-
-	while (1)
-	{
-		i = 0;
-		while (i < info->num_of_philos)
-		{
-			//printf("Looking if %i died of hunger\n", philos[i]->philo_num);
-			if (died_of_hunger(philos[i]))
-				break ;
-			i++;
-		}
-		pthread_mutex_lock(&(info->data_lock));
-		if (info->somebody_died)
-		{
-			detach_threads(philos, info->num_of_philos);
-			pthread_mutex_unlock(&(info->data_lock));
-			return (0);
-		}
-		if (info->minimum_eats > 0 &&
-			info->philos_finished >= info->num_of_philos)
-		{
-			detach_threads(philos, info->num_of_philos);
-			pthread_mutex_unlock(&(info->data_lock));
-			return (0);
-		}
-		pthread_mutex_unlock(&(info->data_lock));
-		usleep(5000);
-	}
-	join_threads(philos, info);
-	return (0);
-}
-
-int	main(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
 	t_info	info;
 	t_philo	**philos;
@@ -140,13 +125,8 @@ int	main(int argc, char *argv[])
 	if (init_info_struct(&info, argv) == -1)
 		return (1);
 	philos = create_philos(&info);
-	if (philos == NULL)
-		return (1);
 	monitor_philos(&info, philos);
 	if (info.somebody_died > 0)
-		printf("%lu %i died\n", milliseconds_since_start(&info), info.somebody_died);
-	destroy_mutextes(&info);
-	free(info.forks);
-	free(philos);
-	return (0);
+		philo_print(&info, info.somebody_died, "died");
+	//free_and_destroy(&info, info.forks, &(info.lock), philos);
 }

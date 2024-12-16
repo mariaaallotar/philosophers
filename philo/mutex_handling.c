@@ -6,21 +6,18 @@
 /*   By: maheleni <maheleni@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/02 11:45:04 by maheleni          #+#    #+#             */
-/*   Updated: 2024/12/09 16:27:21 by maheleni         ###   ########.fr       */
+/*   Updated: 2024/12/16 11:57:45 by maheleni         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
 
-void	destroy_mutextes(t_info *info)
+void	destroy_forks(pthread_mutex_t *forks, int i)
 {
-	int	i;
-
-	i = 0;
-	while (i < info->num_of_philos)
+	while (i >= 0)
 	{
-		pthread_mutex_destroy(&(info->forks[i]));
-		i++;
+		pthread_mutex_destroy(&(forks[i]));
+		i--;
 	}
 }
 
@@ -42,10 +39,31 @@ pthread_mutex_t	*create_fork_array(int num_of_philos)
 		if (pthread_mutex_init(&(forks[i]), NULL) != 0)
 		{
 			error_message("Mutex initialization failed, exiting the program\n");
+			destroy_forks(forks, i - 1);
 			free(forks);
 			return (NULL);
 		}
 		i++;
 	}
 	return (forks);
+}
+
+int	create_data_and_print_mutexes(t_info *info)
+{
+	if (pthread_mutex_init(&(info->lock), NULL) != 0)
+	{
+		destroy_forks(info->forks, info->num_of_philos - 1);
+		free(info->forks);
+		error_message("Mutex initialization failed, exiting the program\n");
+		return (-1);
+	}
+	if (pthread_mutex_init(&(info->print_lock), NULL) != 0)
+	{
+		pthread_mutex_destroy(&(info->lock));
+		destroy_forks(info->forks, info->num_of_philos - 1);
+		free(info->forks);
+		error_message("Mutex initialization failed, exiting the program\n");
+		return (-1);
+	}
+	return (1);
 }

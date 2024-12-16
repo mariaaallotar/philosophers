@@ -5,71 +5,74 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: maheleni <maheleni@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/12/02 11:51:22 by maheleni          #+#    #+#             */
-/*   Updated: 2024/12/10 16:23:27 by maheleni         ###   ########.fr       */
+/*   Created: 2024/12/13 13:32:42 by maheleni          #+#    #+#             */
+/*   Updated: 2024/12/16 15:43:22 by maheleni         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
 
-void	one_philo_edge(t_philo	*philo)
+int    enough_eats(t_philo *philo)
 {
-	int	left_fork;
+	pthread_mutex_lock(&(philo->shared_info->lock));
+	philo->shared_info->philos_finished++;
+	if (philo->shared_info->philos_finished ==
+		philo->shared_info->num_of_philos)
+	{
+		 pthread_mutex_unlock(&(philo->shared_info->lock));
+		 return (-1);
+	}
+	pthread_mutex_unlock(&(philo->shared_info->lock));
+	return (1);
+}
 
+int	philo_think(t_philo *philo)
+{
 	philo_print(philo->shared_info, philo->philo_num, "is thinking");
-	left_fork = philo->philo_num - 1;
-	pthread_mutex_lock(&(philo->shared_info->forks[left_fork]));
-	philo_print(philo->shared_info, philo->philo_num, "has taken a fork");
-	dynamic_sleep(philo, philo->shared_info->time_to_die);
-	philo->shared_info->somebody_died = 1;
-	gettimeofday(&(philo->shared_info->death_time), NULL);
-	pthread_mutex_unlock(&(philo->shared_info->forks[left_fork]));
+	return (0);
 }
 
-void	syncronize_philos(t_info *info)
+int	philo_sleep(t_philo *philo)
 {
-	while (info->start == 0)
-	{
-		usleep(1);
-	}
+	philo_print(philo->shared_info, philo->philo_num, "is sleeping");
+	if (dynamic_wait(philo, philo->shared_info->time_to_sleep) == -1)
+		return (-1);
+	return (1);
 }
 
-void    *philo_life(void *args)
+int stagger_philos(t_philo *philo)
 {
-	t_philo	*philo;
-	int		i;
-
-	philo = (t_philo *) args;
-	if (philo->shared_info->num_of_philos > 100)
-		syncronize_philos(philo->shared_info);
-	if (philo->shared_info->num_of_philos == 1)
+	if (philo->philo_num % 2 == 1)
 	{
-		one_philo_edge(philo);
-		return (NULL);
+		if (dynamic_wait(philo, 55) == -1)
+			return (-1);
 	}
-	gettimeofday(&(philo->last_meal), NULL);
+	return (1);
+}
+
+void    philo_life(t_philo *philo)
+{
+	int i;
+
 	i = 0;
+	if (stagger_philos(philo) == -1)
+		return ;
 	while (1)
 	{
-		if (philo_think(philo) == -1)
-			break ;
-		if (i == 0 && philo->philo_num % 2 == 1)
-			dynamic_sleep(philo, philo->shared_info->time_to_eat - 5);
-		if (time_to_stop(philo))
-			break ;
+		if (i > 0)
+		{
+			if (philo_think(philo) == -1)
+				break ;
+		}
 		if (philo_eat(philo) == -1)
-			break ;
-		if (time_to_stop(philo))
 			break ;
 		i++;
 		if (i == philo->shared_info->minimum_eats)
 		{
-			pthread_mutex_lock(&(philo->shared_info->data_lock));
-			philo->shared_info->philos_finished++;
-			pthread_mutex_unlock(&(philo->shared_info->data_lock));
+			if (enough_eats(philo) == -1)
+				break ;
 		}
 		if (philo_sleep(philo) == -1)
 			break ;
 	}
-	return (&(philo->shared_info->somebody_died));
 }

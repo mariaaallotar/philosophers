@@ -6,7 +6,7 @@
 /*   By: maheleni <maheleni@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/02 10:27:10 by maheleni          #+#    #+#             */
-/*   Updated: 2024/12/10 13:37:36 by maheleni         ###   ########.fr       */
+/*   Updated: 2024/12/16 11:58:44 by maheleni         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,26 +57,4 @@ int	ft_atoi(const char *str)
 	if (*str != '\0')
 		return (-1);
 	return ((int)(res * sign));
-}
-
-unsigned long	milliseconds_since_start(t_info *info)
-{
-	struct timeval now;
-	unsigned long	seconds;
-	unsigned long	microseconds;
-	unsigned long	milliseconds;
-
-	gettimeofday(&now, NULL);
-    seconds = now.tv_sec - info->start_time.tv_sec;
-    if (now.tv_usec < info->start_time.tv_usec)
-    {
-		seconds--;
-        microseconds = (now.tv_usec + 1000000) - info->start_time.tv_usec;
-    }
-    else
-    {
-        microseconds = now.tv_usec - info->start_time.tv_usec;
-    }
-    milliseconds = (seconds * 1000) + (microseconds / 1000);
-	return (milliseconds);
 }

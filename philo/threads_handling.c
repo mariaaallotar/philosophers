@@ -6,7 +6,7 @@
 /*   By: maheleni <maheleni@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/02 10:26:32 by maheleni          #+#    #+#             */
-/*   Updated: 2024/12/10 16:04:51 by maheleni         ###   ########.fr       */
+/*   Updated: 2024/12/16 15:49:31 by maheleni         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,15 +42,20 @@ void	detach_threads(t_philo **philo_pointers, int i)
 	}
 }
 
-int	create_thread(t_info *info, int i, t_philo **philos)
+t_philo	*init_philo_data(t_info *info, int i, t_philo **philos)
 {
 	t_philo	*philo;
 	int		left_fork;
 	int		right_fork;
 
     philo = malloc(sizeof(t_philo));
+	if (philo == NULL)
+	{
+		free_and_destroy(info, info->forks, &(info->lock), philos);
+		error_message("Failed to malloc a philo, exiting the program\n");
+		return (NULL);
+	}
 	philo->shared_info = info;
-	gettimeofday(&(philo->last_meal), NULL);
 	philo->philo_num = i + 1;
 	philos[i] = philo;
 	left_fork = philo->philo_num - 1;
@@ -60,13 +65,21 @@ int	create_thread(t_info *info, int i, t_philo **philos)
 		right_fork = philo->philo_num;
 	philo->left_fork = &(info->forks[left_fork]);
 	philo->right_fork = &(info->forks[right_fork]);
-	if (pthread_create(&(philo->thread), NULL, philo_life, philo) != 0)
+	philo->last_meal = get_time();
+	return (philo);
+}
+
+int	start_philo(t_info *info, int i, t_philo **philos)
+{
+	t_philo	*philo;
+
+	philo = init_philo_data(info, i, philos);
+	if (philo == NULL)
+		return (-1);
+	if (pthread_create(&(philo->thread), NULL, philo_start, philo) != 0)
 	{
-		info->somebody_died = -1;		//remember this
 		detach_threads(philos, i);
-		destroy_mutextes(info);
-		free(info->forks);
-		free(philos);
+		free_and_destroy(info, info->forks, &(info->lock), philos);
 		error_message("Failed to create thread, exiting the program\n");
 		return (-1);
 	}
