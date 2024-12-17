@@ -6,7 +6,7 @@
 /*   By: maheleni <maheleni@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/13 12:43:16 by maheleni          #+#    #+#             */
-/*   Updated: 2024/12/16 15:34:12 by maheleni         ###   ########.fr       */
+/*   Updated: 2024/12/17 15:30:55 by maheleni         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,30 @@ void	one_philo_edge(t_philo *philo)
 	pthread_mutex_unlock(philo->left_fork);
 }
 
-void    *philo_start(void *args)
+void	synchronize_philos(t_info *info, t_philo *philo)
+{
+	pthread_mutex_lock(&(info->lock));
+	while (info->start == 0)
+	{
+		pthread_mutex_unlock(&(info->lock));
+		usleep(1);
+		pthread_mutex_lock(&(info->lock));
+	}
+	philo->last_meal = info->start_time;
+	pthread_mutex_unlock(&(info->lock));
+}
+
+int	stagger_philos(t_philo *philo)
+{
+	if (philo->philo_num % 2 == 1)
+	{
+		if (dynamic_wait(philo, 5) == -1)
+			return (-1);
+	}
+	return (1);
+}
+
+void	*philo_start(void *args)
 {
 	t_philo	*philo;
 
@@ -33,6 +56,9 @@ void    *philo_start(void *args)
 		one_philo_edge(philo);
 		return (NULL);
 	}
+	synchronize_philos(philo->shared_info, philo);
+	if (stagger_philos(philo) == -1)
+		return (NULL);
 	philo_life(philo);
 	return (NULL);
 }

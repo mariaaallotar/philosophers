@@ -6,14 +6,14 @@
 /*   By: maheleni <maheleni@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/13 10:46:02 by maheleni          #+#    #+#             */
-/*   Updated: 2024/12/16 15:34:32 by maheleni         ###   ########.fr       */
+/*   Updated: 2024/12/17 15:25:14 by maheleni         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
 
-void	free_and_destroy(t_info *info, pthread_mutex_t *forks, pthread_mutex_t
-	*lock, t_philo **philos)
+void	free_and_destroy(t_info *info, pthread_mutex_t *forks,
+	pthread_mutex_t *lock, t_philo **philos)
 {
 	int	i;
 
@@ -28,46 +28,13 @@ void	free_and_destroy(t_info *info, pthread_mutex_t *forks, pthread_mutex_t
 		while (i < info->num_of_philos)
 		{
 			if (philos[i] != NULL)
-			{
-				printf("HERE\n");
 				free(philos[i]);
+			else if (philos[i] == NULL)
 				break ;
-			}
 			i++;
 		}
 		free(philos);
 	}
-}
-
-t_philo	**create_philos(t_info *info)
-{
-	int			i;
-	t_philo		**philos;
-
-	philos = malloc(info->num_of_philos * sizeof(t_philo *));
-	if (philos == NULL)
-	{
-		free_and_destroy(info, info->forks, &(info->lock), NULL);
-		error_message("Malloc failed to allocate memory for philo array, \
-			exiting the program\n");
-		return (NULL);
-	}
-	memset(philos, 0, sizeof(*philos));
-	i = 0;
-	info->start_time = get_time();
-	while (i < info->num_of_philos)
-	{
-		printf("0 %i is thinking\n", i + 1);
-		i++;
-	}
-	i = 0;
-	while (i < info->num_of_philos)
-	{
-		if (start_philo(info, i, philos) == -1)
-			return (NULL);
-		i++;
-	}
-	return (philos);
 }
 
 int	init_info_struct(t_info *info, char *argv[])
@@ -86,7 +53,7 @@ int	init_info_struct(t_info *info, char *argv[])
 		info->minimum_eats = ft_atoi(argv[5]);
 	info->philos_finished = 0;
 	info->somebody_died = 0;
-	//info->start = 0;
+	info->start = 0;
 	return (1);
 }
 
@@ -115,7 +82,7 @@ int	validate_args(int argc, char *argv[])
 	return (1);
 }
 
-int main(int argc, char *argv[])
+int	main(int argc, char *argv[])
 {
 	t_info	info;
 	t_philo	**philos;
@@ -125,8 +92,10 @@ int main(int argc, char *argv[])
 	if (init_info_struct(&info, argv) == -1)
 		return (1);
 	philos = create_philos(&info);
+	if (philos == NULL)
+		return (1);
 	monitor_philos(&info, philos);
 	if (info.somebody_died > 0)
 		philo_print(&info, info.somebody_died, "died");
-	//free_and_destroy(&info, info.forks, &(info.lock), philos);
+	free_and_destroy(&info, info.forks, &(info.lock), philos);
 }

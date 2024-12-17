@@ -6,7 +6,7 @@
 /*   By: maheleni <maheleni@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/06 17:31:08 by maheleni          #+#    #+#             */
-/*   Updated: 2024/12/16 15:26:53 by maheleni         ###   ########.fr       */
+/*   Updated: 2024/12/17 15:48:46 by maheleni         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,7 @@ typedef struct	s_info
 	int	time_to_sleep;
 	int	minimum_eats;
 	int	philos_finished;
-	//int	start;
+	int	start;
 }	t_info;
 
 typedef struct s_philo
@@ -67,5 +67,7 @@ void    philo_life(t_philo *philo);
 int philo_eat(t_philo *philo);
 int	create_data_and_print_mutexes(t_info *info);
 size_t    get_time(void);
+t_philo	**create_philos(t_info *info);
+void	detach_threads(t_philo **philo_pointers, int i);
 
 #endif

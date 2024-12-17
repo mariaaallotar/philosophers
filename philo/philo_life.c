@@ -6,21 +6,21 @@
 /*   By: maheleni <maheleni@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/13 13:32:42 by maheleni          #+#    #+#             */
-/*   Updated: 2024/12/16 15:43:22 by maheleni         ###   ########.fr       */
+/*   Updated: 2024/12/17 15:01:04 by maheleni         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
 
-int    enough_eats(t_philo *philo)
+int	enough_eats(t_philo *philo)
 {
 	pthread_mutex_lock(&(philo->shared_info->lock));
 	philo->shared_info->philos_finished++;
-	if (philo->shared_info->philos_finished ==
-		philo->shared_info->num_of_philos)
+	if (philo->shared_info->philos_finished
+		== philo->shared_info->num_of_philos)
 	{
-		 pthread_mutex_unlock(&(philo->shared_info->lock));
-		 return (-1);
+		pthread_mutex_unlock(&(philo->shared_info->lock));
+		return (-1);
 	}
 	pthread_mutex_unlock(&(philo->shared_info->lock));
 	return (1);
@@ -40,23 +40,11 @@ int	philo_sleep(t_philo *philo)
 	return (1);
 }
 
-int stagger_philos(t_philo *philo)
+void	philo_life(t_philo *philo)
 {
-	if (philo->philo_num % 2 == 1)
-	{
-		if (dynamic_wait(philo, 55) == -1)
-			return (-1);
-	}
-	return (1);
-}
-
-void    philo_life(t_philo *philo)
-{
-	int i;
+	int	i;
 
 	i = 0;
-	if (stagger_philos(philo) == -1)
-		return ;
 	while (1)
 	{
 		if (i > 0)

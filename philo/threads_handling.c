@@ -6,7 +6,7 @@
 /*   By: maheleni <maheleni@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/02 10:26:32 by maheleni          #+#    #+#             */
-/*   Updated: 2024/12/16 15:49:31 by maheleni         ###   ########.fr       */
+/*   Updated: 2024/12/17 16:01:52 by maheleni         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +14,8 @@
 
 void	join_threads(t_philo **philo_pointers, t_info *info)
 {
-	int	i;
-	int	*ret;
+	int		i;
+	int		*ret;
 	t_philo	*philos;
 
 	i = 0;
@@ -48,7 +48,7 @@ t_philo	*init_philo_data(t_info *info, int i, t_philo **philos)
 	int		left_fork;
 	int		right_fork;
 
-    philo = malloc(sizeof(t_philo));
+	philo = malloc(sizeof(t_philo));
 	if (philo == NULL)
 	{
 		free_and_destroy(info, info->forks, &(info->lock), philos);
@@ -65,7 +65,8 @@ t_philo	*init_philo_data(t_info *info, int i, t_philo **philos)
 		right_fork = philo->philo_num;
 	philo->left_fork = &(info->forks[left_fork]);
 	philo->right_fork = &(info->forks[right_fork]);
-	philo->last_meal = get_time();
+	info->start_time = get_time();
+	philo->last_meal = info->start_time;
 	return (philo);
 }
 

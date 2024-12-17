@@ -6,7 +6,7 @@
 /*   By: maheleni <maheleni@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/13 14:04:36 by maheleni          #+#    #+#             */
-/*   Updated: 2024/12/16 15:37:16 by maheleni         ###   ########.fr       */
+/*   Updated: 2024/12/17 15:54:13 by maheleni         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,29 +29,26 @@ int	should_stop(t_info *shared_info)
 	return (0);
 }
 
-size_t    get_time(void)
+size_t	get_time(void)
 {
-    struct timeval    time;
-    size_t            result;
+	struct timeval	time;
+	size_t			result;
 
-    gettimeofday(&time, NULL);
-    result = (time.tv_usec / 1000) + (time.tv_sec * 1000);
-    return (result);
+	gettimeofday(&time, NULL);
+	result = (time.tv_usec / 1000) + (time.tv_sec * 1000);
+	return (result);
 }
 
 int	dynamic_wait(t_philo *philo, int time_to_do)
 {
-	int	start;
-	int	now;
+	size_t	end_time;
 
-	start = get_time();
-	now = get_time();
-	while (now - start < time_to_do)
+	end_time = get_time() + time_to_do;
+	while (get_time() < end_time)
 	{
 		if (should_stop(philo->shared_info))
 			return (-1);
-		now = get_time();
-		//usleep(500);
+		usleep(500);
 	}
 	return (0);
 }
@@ -60,8 +57,8 @@ void	philo_print(t_info *info, int philo_num, char *message)
 {
 	int	now;
 
-	now = get_time() - info->start_time;
 	pthread_mutex_lock(&(info->print_lock));
+	now = get_time() - info->start_time;
 	printf("%i %i %s\n", now, philo_num, message);
 	pthread_mutex_unlock(&(info->print_lock));
 }

@@ -6,7 +6,7 @@
 /*   By: maheleni <maheleni@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/13 14:37:26 by maheleni          #+#    #+#             */
-/*   Updated: 2024/12/16 16:30:26 by maheleni         ###   ########.fr       */
+/*   Updated: 2024/12/17 13:40:28 by maheleni         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,8 +15,6 @@
 int	died_of_hunger(t_philo *philo)
 {
 	pthread_mutex_lock(&(philo->shared_info->lock));
-	// if (philo->philo_num == 4)
-	// 	printf("Checking if should die when time since last meal is %i\n", (int)(get_time() - philo->last_meal));
 	if ((int)(get_time() - philo->last_meal) > philo->shared_info->time_to_die)
 	{
 		philo->shared_info->somebody_died = philo->philo_num;

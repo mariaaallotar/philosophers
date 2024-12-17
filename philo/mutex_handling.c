@@ -6,7 +6,7 @@
 /*   By: maheleni <maheleni@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/02 11:45:04 by maheleni          #+#    #+#             */
-/*   Updated: 2024/12/16 11:57:45 by maheleni         ###   ########.fr       */
+/*   Updated: 2024/12/17 15:19:05 by maheleni         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,13 +24,13 @@ void	destroy_forks(pthread_mutex_t *forks, int i)
 pthread_mutex_t	*create_fork_array(int num_of_philos)
 {
 	pthread_mutex_t	*forks;
-	int	i;
+	int				i;
 
 	forks = malloc(num_of_philos * sizeof(pthread_mutex_t));
 	if (forks == NULL)
 	{
-		error_message("Malloc failed to allocate memory for forks array, \
-			exiting the program\n");
+		error_message("Malloc failed to allocate memory for forks array," \
+			" exiting the program\n");
 		return (NULL);
 	}
 	i = 0;
