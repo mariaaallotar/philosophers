@@ -6,7 +6,7 @@
 /*   By: maheleni <maheleni@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/02 11:45:04 by maheleni          #+#    #+#             */
-/*   Updated: 2024/12/17 15:19:05 by maheleni         ###   ########.fr       */
+/*   Updated: 2024/12/18 10:28:08 by maheleni         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,8 @@ void	destroy_forks(pthread_mutex_t *forks, int i)
 {
 	while (i >= 0)
 	{
-		pthread_mutex_destroy(&(forks[i]));
+		if (pthread_mutex_destroy(&(forks[i])) != 0)
+			error_message("Failed to destroy fork mutex\n");
 		i--;
 	}
 }
@@ -59,7 +60,8 @@ int	create_data_and_print_mutexes(t_info *info)
 	}
 	if (pthread_mutex_init(&(info->print_lock), NULL) != 0)
 	{
-		pthread_mutex_destroy(&(info->lock));
+		if (pthread_mutex_destroy(&(info->lock)) != 0)
+			error_message("Failed to destroy mutex\n");
 		destroy_forks(info->forks, info->num_of_philos - 1);
 		free(info->forks);
 		error_message("Mutex initialization failed, exiting the program\n");

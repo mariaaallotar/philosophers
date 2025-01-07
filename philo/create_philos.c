@@ -6,7 +6,7 @@
 /*   By: maheleni <maheleni@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/17 12:36:27 by maheleni          #+#    #+#             */
-/*   Updated: 2024/12/17 16:01:32 by maheleni         ###   ########.fr       */
+/*   Updated: 2024/12/18 10:56:33 by maheleni         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,12 +28,6 @@ int	start_philos(t_info *info, t_philo **philos)
 		printf("0 %i is thinking\n", i + 1);
 		i++;
 	}
-	// i = 0;
-	// while (i < num_of_philos)
-	// {
-	// 	printf("0 %i is thinking\n", i + 1);
-	// 	i++;
-	// }
 	pthread_mutex_lock(&(info->lock));
 	info->start_time = get_time();
 	info->start = 1;

@@ -6,7 +6,7 @@
 /*   By: maheleni <maheleni@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/02 10:26:32 by maheleni          #+#    #+#             */
-/*   Updated: 2024/12/17 16:01:52 by maheleni         ###   ########.fr       */
+/*   Updated: 2024/12/18 10:30:03 by maheleni         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,9 +22,11 @@ void	join_threads(t_philo **philo_pointers, t_info *info)
 	while (i < info->num_of_philos)
 	{
 		philos = *philo_pointers++;
-		pthread_join(philos->thread, (void **)&ret);
-		if (errno)
-			perror(NULL);
+		if (pthread_join(philos->thread, (void **)&ret) != 0)
+		{
+			error_message("Failed to join thread, "
+				"unexpected beahviour expected\n");
+		}
 		i++;
 	}
 }
@@ -37,7 +39,11 @@ void	detach_threads(t_philo **philo_pointers, int i)
 	while (i >= 0)
 	{
 		philos = *philo_pointers++;
-		pthread_detach(philos->thread);
+		if (pthread_detach(philos->thread) != 0)
+		{
+			error_message("Failed to detach thread, "
+				"unexpected beahviour expected\n");
+		}
 		i--;
 	}
 }

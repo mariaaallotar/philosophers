@@ -6,7 +6,7 @@
 /*   By: maheleni <maheleni@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/13 10:46:02 by maheleni          #+#    #+#             */
-/*   Updated: 2024/12/17 15:25:14 by maheleni         ###   ########.fr       */
+/*   Updated: 2024/12/18 10:46:03 by maheleni         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,10 @@ void	free_and_destroy(t_info *info, pthread_mutex_t *forks,
 		destroy_forks(forks, info->num_of_philos - 1);
 	free(forks);
 	if (lock != NULL)
-		pthread_mutex_destroy(lock);
+	{
+		if (pthread_mutex_destroy(lock) != 0)
+			error_message("Failed to destroy mutex\n");
+	}
 	if (philos != NULL)
 	{
 		i = 0;
@@ -59,25 +62,28 @@ int	init_info_struct(t_info *info, char *argv[])
 
 int	validate_args(int argc, char *argv[])
 {
+	int	i;
+
 	if (argc < 5 || argc > 6)
 	{
-		printf("\nUSAGE: This program must take 4 or 5 arguments,\nall "
-			"integers bigger than 0 and smaller than INT_MAX+1,\nthe results "
+		printf("\nUSAGE: This program must take 4 or 5 arguments,\nonly "
+			"integers bigger than 0 and smaller than INT_MAX+1,\nthe maximum "
+			"number of philos is 1000\nthe results "
 			"for numbers outside of that range are undefined\n");
 		printf("\nARGUMENTS:\nnumber_of_philosophers\ntime_to_die\ntime_to_eat\n"
 			"time_to_sleep\n[number_of_times_each_philosopher_must_eat]\n\n");
 		return (-1);
 	}
-	argv++;
-	while (*argv != NULL)
+	i = 1;
+	while (argv[i] != NULL)
 	{
-		if (ft_atoi(*argv) <= 0)
+		if (ft_atoi(argv[i]) <= 0 || (i == 1 && ft_atoi(argv[i]) > 1000))
 		{
 			printf("Argument '%s' outside of accepted range\nExiting program\n",
-				*argv);
+				argv[i]);
 			return (-1);
 		}
-		argv++;
+		i++;
 	}
 	return (1);
 }

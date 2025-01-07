@@ -6,7 +6,7 @@
 /*   By: maheleni <maheleni@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/13 14:04:36 by maheleni          #+#    #+#             */
-/*   Updated: 2024/12/17 15:54:13 by maheleni         ###   ########.fr       */
+/*   Updated: 2024/12/18 10:23:49 by maheleni         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,8 +33,15 @@ size_t	get_time(void)
 {
 	struct timeval	time;
 	size_t			result;
+	int				ret;
 
-	gettimeofday(&time, NULL);
+	ret = gettimeofday(&time, NULL);
+	if (ret == -1)
+	{
+		error_message("Failed to get current time, "
+			"unexpected behaviour expected\n");
+		return (-1);
+	}
 	result = (time.tv_usec / 1000) + (time.tv_sec * 1000);
 	return (result);
 }
